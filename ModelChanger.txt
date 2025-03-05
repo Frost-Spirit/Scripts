@@ -1,0 +1,200 @@
+loadstring(game:HttpGet("https://raw.githubusercontent.com/Frost-Spirit/Scripts/refs/heads/main/test.lua"))()
+
+local scout = {
+        [1] = "Streaming",
+        [2] = "SelectTower",
+        [3] = "Scout",
+        [4] = "Default"
+    }
+game:GetService("ReplicatedStorage").RemoteEvent:FireServer(unpack(scout))
+
+local replicatedStorage = game:GetService("ReplicatedStorage")
+local lastFoundSlot = nil
+
+local tdsGui = Instance.new("ScreenGui")
+local topBar = Instance.new("Frame")
+local mainFrame = Instance.new("Frame")
+local titleLabel = Instance.new("TextLabel")
+local placeButton = Instance.new("TextButton")
+local towerInput = Instance.new("TextBox")
+local skinInput = Instance.new("TextBox")
+local closeButton = Instance.new("ImageButton")
+local topBarText = Instance.new("TextLabel")
+local toggleButton = Instance.new("ImageButton")
+
+tdsGui.Name = "Main"
+tdsGui.Parent = game:WaitForChild("CoreGui")
+tdsGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+topBar.Name = "TopBar"
+topBar.Parent = tdsGui
+topBar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+topBar.Position = UDim2.new(0.25, 0, 0.2, 0)
+topBar.Size = UDim2.new(0, 450, 0, 40)
+topBar.Active = true
+topBar.Draggable = true
+
+topBarText.Parent = topBar
+topBarText.Size = UDim2.new(0, 200, 0, 40)
+topBarText.Position = UDim2.new(0, 10, 0, 0)
+topBarText.Text = "Script by Frost-Spirit"
+topBarText.TextColor3 = Color3.fromRGB(255, 255, 255)
+topBarText.BackgroundTransparency = 1
+topBarText.Font = Enum.Font.SourceSansBold
+topBarText.TextSize = 20
+
+mainFrame.Name = "Main"
+mainFrame.Parent = topBar
+mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+mainFrame.Position = UDim2.new(0, 0, 1, 0)
+mainFrame.Size = UDim2.new(0, 450, 0, 250)
+mainFrame.Visible = false
+
+titleLabel.Parent = mainFrame
+titleLabel.Size = UDim2.new(0, 400, 0, 50)
+titleLabel.Text = "              Enter Tower and Skin Names"
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Font = Enum.Font.SourceSans
+titleLabel.TextSize = 20
+titleLabel.TextWrapped = true
+
+towerInput.Name = "Tower"
+towerInput.Parent = mainFrame
+towerInput.Size = UDim2.new(0, 180, 0, 30)
+towerInput.Position = UDim2.new(0.05, 0, 0.3, 0)
+towerInput.PlaceholderText = "Tower Name"
+towerInput.Text = ""
+towerInput.Font = Enum.Font.SourceSans
+towerInput.TextSize = 16
+towerInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+skinInput.Name = "Skin"
+skinInput.Parent = mainFrame
+skinInput.Size = UDim2.new(0, 180, 0, 30)
+skinInput.Position = UDim2.new(0.55, 0, 0.3, 0)
+skinInput.PlaceholderText = "Skin Name"
+skinInput.Text = ""
+skinInput.Font = Enum.Font.SourceSans
+skinInput.TextSize = 16
+skinInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+placeButton.Name = "Place"
+placeButton.Parent = mainFrame
+placeButton.Size = UDim2.new(0, 100, 0, 30)
+placeButton.Position = UDim2.new(0.5, -50, 0.6, 0)
+placeButton.Text = "Change"
+placeButton.Font = Enum.Font.SourceSansBold
+placeButton.TextSize = 18
+placeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+placeButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+
+closeButton.Name = "Close"
+closeButton.Parent = topBar
+closeButton.Size = UDim2.new(0, 30, 0, 30)
+closeButton.Position = UDim2.new(0.9, 0, 0.1, 0)
+closeButton.Image = "rbxassetid://7072725342"
+closeButton.BackgroundTransparency = 1
+
+toggleButton.Name = "Show"
+toggleButton.Parent = topBar
+toggleButton.Size = UDim2.new(0, 30, 0, 30)
+toggleButton.Position = UDim2.new(0.8, 0, 0.1, 0)
+toggleButton.Image = "rbxassetid://7072706663"
+toggleButton.BackgroundTransparency = 1
+
+local function placeTower()
+
+   local player = game:GetService("Players").LocalPlayer
+   local playerGui = player:FindFirstChild("PlayerGui")
+    if not playerGui then return end
+
+   local hotbar = playerGui:FindFirstChild("ReactUniversalHotbar")
+    if not hotbar then return end
+   local frame = hotbar:FindFirstChild("Frame")
+    if not frame then return end
+   local troops = frame:FindFirstChild("troops")
+    if not troops then return end
+
+    local towerName = towerInput.Text
+    local skinName = skinInput.Text
+
+    if towerName == "" or skinName == "" then return end
+
+    if not lastFoundSlot then
+        for i = 1, 5 do
+            local slot = troops:FindFirstChild(tostring(i))
+            if slot then
+                local content = slot:FindFirstChild("content")
+                if content then
+                    local icon = content:FindFirstChild("Icon")
+                    if icon and icon:FindFirstChild("ImageIcon") then
+                        if icon.ImageIcon.Image == "rbxassetid://16742136020" then
+                            lastFoundSlot = i
+                            icon:FindFirstChild("Shadow"):Destroy()
+                            content:FindFirstChild("Cost"):Destroy()
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    if lastFoundSlot then
+        local slot = troops:FindFirstChild(tostring(lastFoundSlot))
+        if slot then
+            local content = slot:FindFirstChild("content")
+            if content then
+                local icon = content:FindFirstChild("Icon")
+                if icon and icon:FindFirstChild("ImageIcon") then
+                    local newIcon = require(game:GetService("ReplicatedStorage").Resources.Icons).Towers[towerName][skinName]
+                    if newIcon then
+                        icon.ImageIcon.Image = newIcon
+                    end
+                end
+            end
+        end
+    end
+
+    local LoadArgs = {
+        [1] = "Streaming",
+        [2] = "SelectTower",
+        [3] = towerName,
+        [4] = skinName
+    }
+    game:GetService("ReplicatedStorage").RemoteEvent:FireServer(unpack(LoadArgs))
+
+    task.wait(1.2)
+
+   local towerFolder = game:GetService("ReplicatedStorage").Assets.Troops:FindFirstChild(towerName)
+    if not towerFolder then return end
+   local skinsFolder = towerFolder:FindFirstChild("Skins")
+    if not skinsFolder then return end
+   local scoutFolder = game:GetService("ReplicatedStorage").Assets.Troops:FindFirstChild("Scout")
+    if not scoutFolder then return end
+   local scoutSkinsFolder = scoutFolder:FindFirstChild("Skins")
+    if not scoutSkinsFolder then
+        scoutSkinsFolder = Instance.new("Folder")
+        scoutSkinsFolder.Name = "Skins"
+        scoutSkinsFolder.Parent = scoutFolder
+    end
+
+   local oldDefaultSkin = scoutSkinsFolder:FindFirstChild("Default")
+    if oldDefaultSkin then oldDefaultSkin:Destroy() end
+   local targetSkin = skinsFolder:FindFirstChild(skinName)
+    if not targetSkin then return end
+   local clonedSkin = targetSkin:Clone()
+    clonedSkin.Name = "Default"
+    clonedSkin.Parent = scoutSkinsFolder
+end
+
+placeButton.MouseButton1Click:Connect(placeTower)
+
+closeButton.MouseButton1Click:Connect(function()
+    tdsGui:Destroy()
+end)
+
+toggleButton.MouseButton1Click:Connect(function()
+    mainFrame.Visible = not mainFrame.Visible
+    toggleButton.Image = mainFrame.Visible and "rbxassetid://7072706663" or "rbxassetid://7072706796"
+end)
